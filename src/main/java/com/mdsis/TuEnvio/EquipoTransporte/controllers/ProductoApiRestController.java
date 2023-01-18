@@ -22,10 +22,39 @@ public class ProductoApiRestController {
 	@Autowired
 	private CamionRepository camionrepository;
 	
+	
 	@PostMapping("/cargar_camion")
 	public void cargarcamion(@RequestBody Producto producto) {
-		
-			productorepository.save(producto);
+		Integer suma_capacidad_total_max = 0;
+		Integer restante = 0;
+		for(Camion i:camionrepository.findAll()){
+			if(i.getTipoProducto().equals(producto.getTipoProducto())) {
+				suma_capacidad_total_max += i.getCapacidad();
+			}	
+		}
+				for(Camion i:camionrepository.findAll()) {
+					if(i.getTipoProducto().equals(producto.getTipoProducto())) {	
+					    if(producto.getCantidad()<=suma_capacidad_total_max) {
+					    	if(producto.getCantidad()>=i.getCapacidad()) {
+					    		restante = producto.getCantidad()-i.getCapacidad();
+					    		producto.setCantidad(restante);
+					    		i.setCapacidad(0);
+					    		camionrepository.save(i);
+					    	}
+					    	else {
+					    		restante =i.getCapacidad()-producto.getCantidad();
+					    		producto.setCantidad(0);
+					    		i.setCapacidad(restante);
+					    		camionrepository.save(i);
+					    	} 	 
+					    }
+					    else {
+					    	System.out.println("HTTP Status 400");
+					    }
+					    	
+					    }
+					}		
+				}		
 	}
 	
-}
+
